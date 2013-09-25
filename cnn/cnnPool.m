@@ -31,6 +31,5 @@ pooledFeatures = zeros(convolvedDim / poolDim, ...
 
 %%% YOUR CODE HERE %%%
 
-
 end
 

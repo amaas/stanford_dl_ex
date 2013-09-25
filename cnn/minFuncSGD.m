@@ -1,11 +1,12 @@
 function [opttheta] = minFuncSGD(funObj,theta,data,labels,...
                         options)
-% Runs stochastic gradient descent with momentum to optimize the parameters
-% for the given objective.
+% Runs stochastic gradient descent with momentum to optimize the
+% parameters for the given objective.
 %
 % Parameters:
-%  funObj     -  function handle which accepts as input theta, data, labels
-%                and returns cost and gradient w.r.t to theta.
+%  funObj     -  function handle which accepts as input theta,
+%                data, labels and returns cost and gradient w.r.t
+%                to theta.
 %  theta      -  unrolled parameter vector
 %  data       -  stores data in m x n x numExamples tensor
 %  labels     -  corresponding labels in numExamples x 1 vector
@@ -34,7 +35,7 @@ minibatch = options.minibatch;
 m = length(labels); % training set size
 % Setup for momentum
 mom = 0.5;
-momIncrease = 10;
+momIncrease = 20;
 velocity = zeros(size(theta));
 
 %%======================================================================
@@ -47,7 +48,7 @@ for e = 1:epochs
     
     for s=1:minibatch:(m-minibatch+1)
         it = it + 1;
-    
+
         % increase momentum after momIncrease iterations
         if it == momIncrease
             mom = options.momentum;
@@ -60,10 +61,10 @@ for e = 1:epochs
         % evaluate the objective function on the next minibatch
         [cost grad] = funObj(theta,mb_data,mb_labels);
         
-        % Instructions: Add in the weighted velocity vector to the gradient
-        % evaluated above.  Then update the current weights theta according
-        % to the sgd update rule with alpha as the learning rate.  Finally
-        % update the velocity vector.
+        % Instructions: Add in the weighted velocity vector to the
+        % gradient evaluated above scaled by the learning rate.
+        % Then update the current weights theta according to the
+        % sgd update rule
         
         %%% YOUR CODE HERE %%%
         

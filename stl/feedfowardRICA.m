@@ -58,7 +58,7 @@ for imageNum = 1:numImages
     % be sure to do a 'valid' convolution
     % ---- YOUR CODE HERE ----
     resp = conv2(im,filter,'valid');
-      
+    % ------------------------      
     % Then, apply square-square-root pooling on "resp" to get the hidden
     % activation "act"
     act = zeros(convDim / poolDim, convDim / poolDim); % You should replace this

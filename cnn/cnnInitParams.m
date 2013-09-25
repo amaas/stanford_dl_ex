@@ -28,7 +28,8 @@ assert(mod(outDim,poolDim)==0,...
 outDim = outDim/poolDim;
 hiddenSize = outDim^2*numFilters;
 
-r  = sqrt(6) / sqrt(numClasses+hiddenSize+1);   % we'll choose weights uniformly from the interval [-r, r]
+% we'll choose weights uniformly from the interval [-r, r]
+r  = sqrt(6) / sqrt(numClasses+hiddenSize+1);
 Wd = rand(numClasses, hiddenSize) * 2 * r - r;
 
 bc = zeros(numFilters, 1);

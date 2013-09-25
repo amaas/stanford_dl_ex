@@ -131,11 +131,12 @@ randTheta2 = randTheta2(:);
 
 %  Use minFunc and softmax_regression_vec from the previous exercise to 
 %  train a multi-class classifier. 
-%% ----------------- YOUR CODE HERE ----------------------
 options.Method = 'lbfgs';
 options.MaxFunEvals = Inf;
 options.MaxIter = 300;
+
 % optimize
+%% ----------------- YOUR CODE HERE ----------------------
 [opttheta_softmax, cost, exitflag] = minFunc( @(theta) softmax_regression_vec(theta, trainFeatures, trainLabels), randTheta2, options);
 
 %% -----------------------------------------------------

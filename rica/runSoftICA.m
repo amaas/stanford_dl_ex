@@ -24,10 +24,11 @@ data = loadMNISTImages('../common/train-images-idx3-ubyte');
 % Step 1) Sample patches
 patches = samplePatches(data,params.patchWidth,params.m);
 % Step 2) Apply ZCA
-%%% YOUR CODE HERE %%%
+patches = zca2(patches);
 % Step 3) Normalize each patch. Each patch should be normalized as
 % x / ||x||_2 where x is the vector representation of the patch
-%%% YOUR CODE HERE %%%
+m = sqrt(sum(patches.^2) + (1e-8));
+x = bsxfunwrap(@rdivide,patches,m);
 
 %% Run the optimization
 options.Method = 'lbfgs';

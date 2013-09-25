@@ -15,8 +15,8 @@
 % Configuration
 imageDim = 28;
 numClasses = 10;  % Number of classes (MNIST images fall into 10 classes)
-filterDim = 9;    % Filter size for conv layer (should divide imageDim)
-numFilters = 10;   % Number of filters for conv layer
+filterDim = 9;    % Filter size for conv layer
+numFilters = 20;   % Number of filters for conv layer
 poolDim = 2;      % Pooling dimension, (should divide imageDim-filterDim+1)
 
 % Load MNIST Train
@@ -39,7 +39,7 @@ theta = cnnInitParams(imageDim,filterDim,numFilters,poolDim,numClasses);
 %  calculation for your cnnCost.m function.  You may need to add the
 %  appropriate path or copy the file to this directory.
 
-DEBUG=true;  % set this to true to check gradient
+DEBUG=false;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
