@@ -1,5 +1,5 @@
 function [opttheta] = minFuncSGD(funObj,theta,data,labels,...
-                        options)
+    options)
 % Runs stochastic gradient descent with momentum to optimize the
 % parameters for the given objective.
 %
@@ -21,22 +21,27 @@ function [opttheta] = minFuncSGD(funObj,theta,data,labels,...
 %  minibatch*  - size of minibatch
 %  momentum    - momentum constant, defualts to 0.9
 
+USE_GPU = 0;
 
 %%======================================================================
 %% Setup
 assert(all(isfield(options,{'epochs','alpha','minibatch'})),...
-        'Some options not defined');
+    'Some options not defined');
 if ~isfield(options,'momentum')
     options.momentum = 0.9;
 end;
 epochs = options.epochs;
 alpha = options.alpha;
 minibatch = options.minibatch;
-m = length(labels); % training set size
+numSamples = length(labels); % training set size
 % Setup for momentum
 mom = 0.5;
 momIncrease = 20;
-velocity = zeros(size(theta));
+if USE_GPU
+    velocity = gpuArray.zeros(size(theta));
+else
+    velocity = zeros(size(theta));
+end
 
 %%======================================================================
 %% SGD loop
@@ -44,22 +49,24 @@ it = 0;
 for e = 1:epochs
     
     % randomly permute indices of data for quick minibatch sampling
-    rp = randperm(m);
-    
-    for s=1:minibatch:(m-minibatch+1)
+    rp = randperm(numSamples);
+    ticEpoch = tic;
+    for s=1 : minibatch : (numSamples - minibatch + 1)
+        tic;
         it = it + 1;
-
+        
         % increase momentum after momIncrease iterations
         if it == momIncrease
             mom = options.momentum;
         end;
-
+        
         % get next randomly selected minibatch
-        mb_data = data(:,:,rp(s:s+minibatch-1));
-        mb_labels = labels(rp(s:s+minibatch-1));
-
+        mb_data = data(:, :, rp(s : min(s + minibatch - 1, end)));
+        mb_labels = labels(rp(s : min(s + minibatch - 1, end)));
+        
         % evaluate the objective function on the next minibatch
-        [cost grad] = funObj(theta,mb_data,mb_labels);
+        size_mb_data = size(mb_data);
+        [cost grad] = funObj(theta, mb_data, mb_labels);
         
         % Instructions: Add in the weighted velocity vector to the
         % gradient evaluated above scaled by the learning rate.
@@ -67,13 +74,20 @@ for e = 1:epochs
         % sgd update rule
         
         %%% YOUR CODE HERE %%%
+        velocity = mom * velocity + alpha * grad;
+        theta = theta - velocity;
         
-        fprintf('Epoch %d: Cost on iteration %d is %f\n',e,it,cost);
+        fprintf('Epoch %d: Cost on iteration %d is %f\n', e, it, cost);
+        toc;
+%         if it > 1
+%             break;
+%         end
     end;
-
+    fprintf('Epoch %d\n', e);
+    toc(ticEpoch);
     % aneal learning rate by factor of two after each epoch
     alpha = alpha/2.0;
-
+%     break;
 end;
 
 opttheta = theta;

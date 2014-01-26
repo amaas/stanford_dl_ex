@@ -30,6 +30,18 @@ pooledFeatures = zeros(convolvedDim / poolDim, ...
 %   Use mean pooling here.
 
 %%% YOUR CODE HERE %%%
+poolFilter = ones(poolDim, poolDim);
+poolDimSquared = poolDim * poolDim;
+poolIndex = 1 : poolDim : (convolvedDim - max(0, poolDim - 1));
+% parfor imageNum = 1:numImages
+for imageNum = 1:numImages
+  for filterNum = 1:numFilters
+      feature = convolvedFeatures(:, :, filterNum, imageNum);
+      convolvedFeature = conv2(feature, poolFilter, 'valid');
+      pooledFeatures(:, :, filterNum, imageNum) = ...
+          convolvedFeature(poolIndex, poolIndex) / poolDimSquared;
+  end
+end
 
 end
 
