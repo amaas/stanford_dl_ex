@@ -27,8 +27,9 @@ if ~exist('pred','var')
     pred = false;
 end;
 
-imageDim = size(images,1); % height/width of image
-numImages = size(images,3); % number of images
+imageDim = size(images, 1); % height/width of image
+numChannels = size(images, 3);
+numImages = size(images, 4); % number of images
 
 weightDecay = 1e-3; % regularization
 USE_WEIGHT_DECAY = 1;
@@ -105,26 +106,29 @@ for filterNum = 1 : numFilters
 end
 areaOfPoolingFilter = poolDim ^ 2;
 meanPoolingFilter = meanPoolingFilter / areaOfPoolingFilter;
-poolingIndex = 1 : poolDim : size(conv2(conv2(images(:, :, 1), Wc_rotated(:, :, 1), 'valid'), meanPoolingFilter, 'valid'), 1);
+poolingIndex = 1 : poolDim : size(conv2(conv2(images(:, :, 1, 1), Wc_rotated(:, :, 1), 'valid'), meanPoolingFilter, 'valid'), 1);
 parfor imageNum = 1 : numImages
-    image = images(:, :, imageNum);
     for filterNum = 1 : numFilters
-        %         filter = Wc_rotated(:, :, filterNum);
-        %         filteredImage = conv2(image, filter, 'valid');
-        
-        filteredImage = conv2(image, Wc_rotated(:, :, filterNum), 'valid') + bc(filterNum);
-        
-        switch activationType
-            case 'relu'
-                filteredImage = max(filteredImage, 0); % relu
-            case 'sigmoid'
-                filteredImage = sigmoid(filteredImage); % sigmoid
+        for channelNum = 1 : numChannels
+            image = images(:, :, channelNum, imageNum);
+            %         filter = Wc_rotated(:, :, filterNum);
+            %         filteredImage = conv2(image, filter, 'valid');
+            filteredImage = conv2(image, Wc_rotated(:, :, filterNum), 'valid') + bc(filterNum);
+            
+            switch activationType
+                case 'relu'
+                    filteredImage = max(filteredImage, 0); % relu
+                case 'sigmoid'
+                    filteredImage = sigmoid(filteredImage); % sigmoid
+            end
+            activations(:, :, filterNum, imageNum) = activations(:, :, filterNum, imageNum) + filteredImage;
+            pooledImage = conv2(filteredImage, meanPoolingFilter, 'valid');
+            activationsPooled(:, :, filterNum, imageNum) = activationsPooled(:, :, filterNum, imageNum) + pooledImage(poolingIndex, poolingIndex);
         end
-        activations(:, :, filterNum, imageNum) = filteredImage;
-        pooledImage = conv2(filteredImage, meanPoolingFilter, 'valid');
-        activationsPooled(:, :, filterNum, imageNum) = pooledImage(poolingIndex, poolingIndex);
     end
 end
+activations = activations / numChannels;
+activationsPooled = activationsPooled / numChannels;
 
 % activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
 % activationsPooled = cnnPool(poolDim, activations);
@@ -167,7 +171,6 @@ probs = bsxfun(@rdivide, activationsSoftmax, sum(activationsSoftmax));
 cost = 0; % save objective into cost
 
 %%% YOUR CODE HERE %%%
-
 labelIndex = sub2ind(size(activationsSoftmax), labels', 1:numImages);
 % log_probs = log(probs);
 % cost = -sum(log_probs(labelIndex));
@@ -288,8 +291,8 @@ end
 
 % parfor filterNum = 1 : numFilters
 for filterNum = 1 : numFilters
-%     e = errorsConvolution(:, :, filterNum, :);
-        e = errorsPooling(:, :, filterNum, :);
+    %     e = errorsConvolution(:, :, filterNum, :);
+    e = errorsPooling(:, :, filterNum, :);
     bc_grad(filterNum) = sum(e(:));
 end
 parfor filterNum = 1 : numFilters
@@ -311,17 +314,20 @@ for filterNum = 1 : numFilters
     Wc_gradFilter = zeros(size(Wc_grad, 1), size(Wc_grad, 2));
     %     parfor imageNum = 1 : numImages
     for imageNum = 1 : numImages
-        %                 image = images(:, :, imageNum);
-        %                 error = errorsPooling(:, :, filterNum, imageNum);
-        %         %         Wc_grad(:, :, filterNum) = Wc_grad(:, :, filterNum) + conv2(image, error, 'valid');
-        %         Wc_gradFilter(:, :, imageNum) = conv2(image, error, 'valid');
-        %         Wc_gradFilter(:, :, imageNum) = conv2(images(:, :, imageNum), errorsPooling(:, :, filterNum, imageNum), 'valid');
-        
-        Wc_gradFilter = Wc_gradFilter + conv2(images(:, :, imageNum), errorsConvolution(:, :, filterNum, imageNum), 'valid');
-        %         Wc_gradFilter = Wc_gradFilter + conv2(image, error, 'valid');
+        for channelNum = 1 : numChannels
+            image = images(:, :, channelNum, imageNum);
+            %                 image = images(:, :, imageNum);
+            %                 error = errorsPooling(:, :, filterNum, imageNum);
+            %         %         Wc_grad(:, :, filterNum) = Wc_grad(:, :, filterNum) + conv2(image, error, 'valid');
+            %         Wc_gradFilter(:, :, imageNum) = conv2(image, error, 'valid');
+            %         Wc_gradFilter(:, :, imageNum) = conv2(images(:, :, imageNum), errorsPooling(:, :, filterNum, imageNum), 'valid');
+            
+            Wc_gradFilter = Wc_gradFilter + conv2(image, errorsConvolution(:, :, filterNum, imageNum), 'valid');
+            %         Wc_gradFilter = Wc_gradFilter + conv2(image, error, 'valid');
+        end
     end
     %     Wc_grad(:, :, filterNum) = sum(Wc_gradFilter, 3) / numImages + regularization;
-    Wc_grad(:, :, filterNum) = Wc_gradFilter;
+    Wc_grad(:, :, filterNum) = Wc_gradFilter / numChannels;
 end
 if USE_WEIGHT_DECAY
     Wc_grad = Wc_grad + weightDecay * Wc;

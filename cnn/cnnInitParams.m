@@ -20,7 +20,7 @@ assert(filterDim < imageDim,'filterDim must be less that imageDim');
 outDim = imageDim - filterDim + 1; % dimension of convolved image
 
 % assume outDim is multiple of poolDim
-assert(mod(outDim,poolDim)==0,...
+assert(mod(outDim, poolDim)==0,...
        'poolDim must divide imageDim - filterDim + 1');
 
 Wc = 1e-1*randn(filterDim,filterDim,numFilters);

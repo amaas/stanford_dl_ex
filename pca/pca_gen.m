@@ -1,7 +1,7 @@
 %%================================================================
 %% Step 0a: Load data
 %  Here we provide the code to load natural image data into x.
-%  x will be a 784 * 600000 matrix, where the kth column x(:, k) corresponds to
+%  x will be a 784 * 600000 matrix, where the kth column x(:, k)  to
 %  the raw image data from the kth 12x12 image patch sampled.
 %  You do not need to change the code below.
 
@@ -16,6 +16,8 @@ display_network(x(:,randsel));
 %  You can make use of the mean and repmat/bsxfun functions.
 
 %%% YOUR CODE HERE %%%
+meanX = mean(x, 1);
+x = bsxfun(@minus, x, meanX);
 
 %%================================================================
 %% Step 1a: Implement PCA to obtain xRot
@@ -23,6 +25,10 @@ display_network(x(:,randsel));
 %  with respect to the eigenbasis of sigma, which is the matrix U.
 
 %%% YOUR CODE HERE %%%
+sigma = x * x' / size(x, 2);
+[U, S, V] = svd(sigma);
+xRot = U' * x;          % rotated version of the data. 
+xHat = U(:, :)' * x;
 
 %%================================================================
 %% Step 1b: Check your implementation of PCA
@@ -34,6 +40,7 @@ display_network(x(:,randsel));
 %  diagonal (non-zero entries) against a blue background (zero entries).
 
 %%% YOUR CODE HERE %%%
+covar = xHat * xHat' / size(x, 2);
 
 % Visualise the covariance matrix. You should see a line across the
 % diagonal against a blue background.
@@ -46,7 +53,15 @@ imagesc(covar);
 %  to retain at least 99% of the variance.
 
 %%% YOUR CODE HERE %%%
-
+eigenValues = diag(S);
+cs = cumsum(eigenValues);
+cs = cs / cs(end);
+for k = 1:length(cs)
+    if cs(k) >= .99
+        break;
+    end
+end
+                        
 %%================================================================
 %% Step 3: Implement PCA with dimension reduction
 %  Now that you have found k, you can reduce the dimension of the data by
@@ -62,16 +77,17 @@ imagesc(covar);
 %  correspond to dimensions with low variation.
 
 %%% YOUR CODE HERE %%%
-
+xHat = U(:, 1:k)' * x; % reduced dimension representation of the data, 
+                        % where k is the number of eigenvectors to keep
+xHat = U(:, 1:k) * xHat;                        
+                       
 % Visualise the data, and compare it to the raw data
 % You should observe that the raw and processed data are of comparable quality.
 % For comparison, you may wish to generate a PCA reduced image which
 % retains only 90% of the variance.
 
-figure('name',['PCA processed images ',sprintf('(%d / %d dimensions)', k, size(x, 1)),'']);
+figure('name',['PCA with dimension reduction processed images ',sprintf('(%d / %d dimensions)', k, size(x, 1)),'']);
 display_network(xHat(:,randsel));
-figure('name','Raw images');
-display_network(x(:,randsel));
 
 %%================================================================
 %% Step 4a: Implement PCA with whitening and regularisation
@@ -80,6 +96,7 @@ display_network(x(:,randsel));
 
 epsilon = 1e-1; 
 %%% YOUR CODE HERE %%%
+xPCAwhite = diag(1./sqrt(diag(S) + epsilon)) * U' * x;
 
 %% Step 4b: Check your implementation of PCA whitening 
 %  Check your implementation of PCA whitening with and without regularisation. 
@@ -97,11 +114,17 @@ epsilon = 1e-1;
 %  becoming smaller.
 
 %%% YOUR CODE HERE %%%
+covar = xPCAwhite * xPCAwhite';
 
 % Visualise the covariance matrix. You should see a red line across the
 % diagonal against a blue background.
-figure('name','Visualisation of covariance matrix');
+figure('name','Visualisation of PCA whitening covariance matrix');
 imagesc(covar);
+
+% Visualise the data, and compare it to the raw data.
+% You should observe that the whitened images have enhanced edges.
+figure('name','PCA whitened images');
+display_network(xPCAwhite(:,randsel));
 
 %%================================================================
 %% Step 5: Implement ZCA whitening
@@ -110,10 +133,9 @@ imagesc(covar);
 %  that whitening results in, among other things, enhanced edges.
 
 %%% YOUR CODE HERE %%%
+xZCAWhite = U * diag(1./sqrt(diag(S) + epsilon)) * U' * x;
 
 % Visualise the data, and compare it to the raw data.
 % You should observe that the whitened images have enhanced edges.
 figure('name','ZCA whitened images');
 display_network(xZCAWhite(:,randsel));
-figure('name','Raw images');
-display_network(x(:,randsel));

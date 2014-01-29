@@ -127,8 +127,8 @@ for e = 1:epochs
         
         fprintf('Epoch %d: Cost on iteration %d is %f\n', e, iteration, cost);
         toc;
-        if mod(iteration, test_interval_iterations) == 0 || (e == epochs && s == (numSamples - minibatch + 1))
-            [~, ~, preds]=cnnCost(theta, testImages, testLabels, ...
+        if mod(iteration, test_interval_iterations) == 0
+            [~, ~, preds] = funObj(theta, testImages, testLabels, ...
                 numClasses, filterDim, numFilters, poolDim, true);
             
             acc = 100 * sum(preds==testLabels) / length(preds);
@@ -155,7 +155,7 @@ end;
 
 opttheta = theta;
 
-save(options.test_results_save_file, 'test_results');
+save([options.test_results_save_file '.mat'], 'test_results');
 
 end
 
