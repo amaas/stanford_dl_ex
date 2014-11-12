@@ -43,7 +43,8 @@ theta = rand(n,1);
 % in linear_regression.m
 %
 tic;
-options = struct('MaxIter', 200);
+options = struct('MaxIter', 200);%when get running error，can try options = struct('MaxIter', 200,'useMex',0);
+%thanks for Chih Cheng Liang‘s advice；
 theta = minFunc(@linear_regression, theta, options, train.X, train.y);
 fprintf('Optimization took %f seconds.\n', toc);
 
