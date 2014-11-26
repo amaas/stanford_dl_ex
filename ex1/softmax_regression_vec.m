@@ -8,12 +8,12 @@ function [f,g] = softmax_regression(theta, X,y)
   %
   %   X - The examples stored in a matrix.  
   %       X(i,j) is the i'th coordinate of the j'th example.
-  %   y - The label for each example.  y(j) is the j'th example's label.
+  %   y - Row vector of labels for each example.  y(j) is the j'th example's label.
   %
   m=size(X,2);
   n=size(X,1);
 
-  % theta is a vector;  need to reshape to n x num_classes.
+  % theta is a vector;  need to reshape to n x (num_classes-1).
   theta=reshape(theta, n, []);
   num_classes=size(theta,2)+1;
   
