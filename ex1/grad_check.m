@@ -6,13 +6,18 @@ function average_error = grad_check(fun, theta0, num_checks, varargin)
   fprintf(' Iter       i             err');
   fprintf('           g_est               g               f\n')
 
+  % same for all iterations; moved outside loop
+  T = theta0;
+  [f,g] = fun(T, varargin{:});
+
+  % could do randsample(numel(T), num_checks), but this is more Octave-compatible
+  shuffle = randperm(numel(T));
+
   for i=1:num_checks
-    T = theta0;
-    j = randsample(numel(T),1);
+    j = shuffle(i); % randsample(n, 1) == sampling WITH replacement...
     T0=T; T0(j) = T0(j)-delta;
     T1=T; T1(j) = T1(j)+delta;
 
-    [f,g] = fun(T, varargin{:});
     f0 = fun(T0, varargin{:});
     f1 = fun(T1, varargin{:});
 
@@ -25,4 +30,4 @@ function average_error = grad_check(fun, theta0, num_checks, varargin)
     sum_error = sum_error + error;
   end
 
-  average=sum_error/num_checks;
+  average_error=sum_error/num_checks;
