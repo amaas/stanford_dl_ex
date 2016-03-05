@@ -288,8 +288,8 @@ end
 
 % parfor filterNum = 1 : numFilters
 for filterNum = 1 : numFilters
-%     e = errorsConvolution(:, :, filterNum, :);
-        e = errorsPooling(:, :, filterNum, :);
+    e = errorsConvolution(:, :, filterNum, :);
+    % e = errorsPooling(:, :, filterNum, :);
     bc_grad(filterNum) = sum(e(:));
 end
 parfor filterNum = 1 : numFilters
