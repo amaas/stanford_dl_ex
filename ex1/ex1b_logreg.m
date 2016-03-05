@@ -30,8 +30,8 @@ theta = rand(n,1)*0.001;
 % TODO:  Implement batch logistic regression in the logistic_regression.m file!
 %
 tic;
-theta=minFunc(@logistic_regression, theta, options, train.X, train.y);
-fprintf('Optimization took %f seconds.\n', toc);
+% theta=minFunc(@logistic_regression, theta, options, train.X, train.y);
+% fprintf('Optimization took %f seconds.\n', toc);
 
 % Now, call minFunc again with logistic_regression_vec.m as objective.
 %
@@ -42,8 +42,8 @@ fprintf('Optimization took %f seconds.\n', toc);
 % Uncomment the lines below to run your vectorized code.
 %theta = rand(n,1)*0.001;
 %tic;
-%theta=minFunc(@logistic_regression_vec, theta, options, train.X, train.y);
-%fprintf('Optimization took %f seconds.\n', toc);
+theta=minFunc(@logistic_regression_vec, theta, options, train.X, train.y);
+fprintf('Optimization took %f seconds.\n', toc);
 
 % Print out training accuracy.
 tic;

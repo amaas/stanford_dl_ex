@@ -1,6 +1,6 @@
 function average_error = grad_check(fun, theta0, num_checks, varargin)
 
-  delta=1e-3; 
+  delta=1e-4; 
   sum_error=0;
 
   fprintf(' Iter       i             err');
@@ -19,10 +19,10 @@ function average_error = grad_check(fun, theta0, num_checks, varargin)
     g_est = (f1-f0) / (2*delta);
     error = abs(g(j) - g_est);
 
-    fprintf('% 5d  % 6d % 15g % 15f % 15f % 15f\n', ...
-            i,j,error,g(j),g_est,f);
+    fprintf('% 5d  % 6d % 15g % 15f % 15f % 15f %15f %15f\n', ...
+            i, j, error, g(j), g_est, f, f0, f1);
 
     sum_error = sum_error + error;
   end
 
-  average=sum_error/num_checks;
+  average_error = sum_error/num_checks;
